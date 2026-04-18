@@ -262,30 +262,36 @@
         </section>
 
         <!-- LABORATORIO -->
+        <!-- LABORATORIO CLI ACTUALIZADO -->
         <section id="lab">
-            <h2>Laboratorio CLI (Switch PEPE)</h2>
+            <h2>Laboratorio de Configuración (Switch)</h2>
             <div class="terminal">
                 <div class="term-header">
                     <div class="dot" style="background: #ff5f56;"></div>
                     <div class="dot" style="background: #ffbd2e;"></div>
                     <div class="dot" style="background: #27c93f;"></div>
+                    <span style="margin-left: auto; font-size: 0.7rem; color: var(--text-muted);">Cisco IOS - Configuración VTP Completa</span>
                 </div>
                 <div class="term-body">
-                    <span class="comment"># Identidad y Seguridad Básica</span>
+                    <span class="comment"># 1. Seguridad Básica y Hostname</span>
                     <span class="cmd">Switch#</span> configure terminal<br>
                     <span class="cmd">PEPE(config)#</span> hostname PEPE<br>
                     <span class="cmd">PEPE(config)#</span> enable secret pepe<br>
-                    <span class="cmd">PEPE(config)#</span> line console 0<br>
-                    <span class="cmd">PEPE(config-line)#</span> password pepe<br>
-                    <span class="cmd">PEPE(config-line)#</span> login<br>
 
-                    <span class="comment"># Configuración de VLANs</span>
+                    <span class="comment"># 2. Configuración de Red VTP</span>
+                    <span class="comment">! Observación: El dominio y password deben ser idénticos en todos los switches para sincronizar</span>
+                    <span class="cmd">PEPE(config)#</span> vtp domain ETITC_LAB<br>
+                    <span class="comment">! Observación: Modo Server (Default) permite crear VLANs y aumenta el 'Revision Number'</span>
+                    <span class="cmd">PEPE(config)#</span> vtp mode server<br>
+                    <span class="cmd">PEPE(config)#</span> vtp password cisco123<br>
+
+                    <span class="comment"># 3. Creación de Datos (VLANs)</span>
                     <span class="cmd">PEPE(config)#</span> vlan 10<br>
                     <span class="cmd">PEPE(config-vlan)#</span> name distribucion<br>
                     <span class="cmd">PEPE(config-vlan)#</span> vlan 20<br>
                     <span class="cmd">PEPE(config-vlan)#</span> name registro<br>
 
-                    <span class="comment"># Asignación de Interfaces de Acceso</span>
+                    <span class="comment"># 4. Configuración de Puertos de Acceso</span>
                     <span class="cmd">PEPE(config)#</span> interface fastethernet 0/3<br>
                     <span class="cmd">PEPE(config-if)#</span> switchport mode access<br>
                     <span class="cmd">PEPE(config-if)#</span> switchport access vlan 10<br>
@@ -294,17 +300,84 @@
                     <span class="cmd">PEPE(config-if)#</span> switchport mode access<br>
                     <span class="cmd">PEPE(config-if)#</span> switchport access vlan 20<br>
 
-                    <span class="comment"># Configuración de Troncal e implementación VTP</span>
-                    <span class="cmd">PEPE(config)#</span> interface Fa0/1<br>
+                    <span class="comment"># 5. Configuración Troncal (Vital para el transporte de anuncios VTP)</span>
+                    <span class="cmd">PEPE(config)#</span> interface fastethernet 0/1<br>
                     <span class="cmd">PEPE(config-if)#</span> switchport mode trunk<br>
                     <span class="cmd">PEPE(config-if)#</span> end<br>
 
-                    <span class="comment"># Comandos de Verificación</span>
+                    <span class="comment"># 6. Verificación de Estado (show vtp status)</span>
                     <span class="cmd">PEPE#</span> show vtp status<br>
+                    <span class="out">
+                    VTP Version                     : 2<br>
+                    Configuration Revision          : 4<br>
+                    Maximum VLANs supported locally : 255<br>
+                    Number of existing VLANs        : 7<br>
+                    VTP Operating Mode              : Server<br>
+                    VTP Domain Name                 : ETITC_LAB<br>
+                    VTP Pruning Mode                : Disabled<br>
+                    VTP V2 Mode                     : Disabled<br>
+                    VTP Traps Generation            : Disabled<br>
+                    MD5 digest                      : 0x5D 0x2A 0x81 0x21 0x6E 0x11 0x23 0x90<br>
+                    Configuration last modified by 0.0.0.0 at 3-1-24 12:00:00
+                    </span><br>
                     <span class="cmd">PEPE#</span> write memory<br>
                 </div>
             </div>
         </section>
+
+
+                <!-- CONFIGURACIÓN DE MODOS ALTERNATIVOS -->
+        <section id="alt-modes">
+            <h2>Configuración de Modos Cliente y Transparente</h2>
+            <div class="grid-3" style="grid-template-columns: 1fr 1fr; gap: 2rem;">
+                
+                <!-- TERMINAL MODO CLIENTE -->
+                <div class="terminal">
+                    <div class="term-header">
+                        <div class="dot" style="background: #ff5f56;"></div>
+                        <div class="dot" style="background: #ffbd2e;"></div>
+                        <div class="dot" style="background: #27c93f;"></div>
+                        <span style="margin-left: auto; font-size: 0.7rem; color: var(--text-muted);">Switch_Cliente (Sincronizado)</span>
+                    </div>
+                    <div class="term-body">
+                        <span class="comment"># Configuración para recibir actualizaciones</span>
+                        <span class="cmd">Switch(config)#</span> vtp domain ETITC_LAB<br>
+                        <span class="cmd">Switch(config)#</span> vtp password cisco123<br>
+                        <span class="cmd">Switch(config)#</span> vtp mode client<br>
+                        <span class="out">Setting device to VTP CLIENT mode.</span><br>
+                        
+                        <span class="comment">! Observación: Si intentas crear una VLAN en este modo, el IOS dará error:</span>
+                        <span class="cmd">Switch(config)#</span> vlan 30<br>
+                        <span class="out">VTP VLAN configuration not allowed when device is in CLIENT mode.</span>
+                    </div>
+                </div>
+
+                <!-- TERMINAL MODO TRANSPARENTE -->
+                <div class="terminal">
+                    <div class="term-header">
+                        <div class="dot" style="background: #ff5f56;"></div>
+                        <div class="dot" style="background: #ffbd2e;"></div>
+                        <div class="dot" style="background: #27c93f;"></div>
+                        <span style="margin-left: auto; font-size: 0.7rem; color: var(--text-muted);">Switch_Transparente (Aislado)</span>
+                    </div>
+                    <div class="term-body">
+                        <span class="comment"># Configuración para ignorar sincronización</span>
+                        <span class="cmd">Switch(config)#</span> vtp domain ETITC_LAB<br>
+                        <span class="cmd">Switch(config)#</span> vtp password cisco123<br>
+                        <span class="cmd">Switch(config)#</span> vtp mode transparent<br>
+                        <span class="out">Setting device to VTP TRANSPARENT mode.</span><br>
+                        
+                        <span class="comment">! Observación: En este modo el 'Revision Number' siempre será 0</span>
+                        <span class="cmd">Switch#</span> show vtp status | include Revision<br>
+                        <span class="out">Configuration Revision : 0</span><br>
+                        <span class="comment"># Permite crear VLANs locales que no se propagan</span>
+                        <span class="cmd">Switch(config)#</span> vlan 99<br>
+                        <span class="cmd">Switch(config-vlan)#</span> name vlan_privada
+                    </div>
+                </div>
+
+            </div>
+</section>
 
         <footer>
             <p>VLAN TRUNKING PROTOCOL (VTP)</p>
